@@ -19,8 +19,14 @@ app.use(morgan('dev'));
 // USE THE USER RAUTER
 app.use('/api/user',userRouter);
 app.use('/api/actor',actorRouter);
-app.use("/*", handleNotFound)
 
+app.use("/test", (req, res)=>{
+    res.json({
+        message: "Hello World!!"
+    });
+})
+
+app.use("/*", handleNotFound);
 // MANAGE ERRORS
 app.use(errorHandling)
 
