@@ -14,6 +14,7 @@ exports.createActor = async (req, res) => {
 
     if (file) {
         const { url, public_id } = uploadImageToCloud(file.path);
+        console.log(url, public_id);
         newActor.avatar = {
             url,
             public_id
