@@ -13,7 +13,7 @@ exports.createActor = async (req, res) => {
     const newActor = new Actor({ name, about, gender });
 
     if (file) {
-        const { url, public_id } = uploadImageToCloud(file.path);
+        const { url, public_id } = await uploadImageToCloud(file.path);
         console.log(url, public_id);
         newActor.avatar = {
             url,
@@ -53,7 +53,7 @@ exports.updateActor = async (req, res) => {
 
     // upload avatar
     if (file) {
-        const { url, public_id } = uploadImageToCloud(file.path);
+        const { url, public_id } = await uploadImageToCloud(file.path);
         actor.avatar = {
             url,
             public_id
