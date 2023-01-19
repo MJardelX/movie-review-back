@@ -13,10 +13,17 @@ exports.createActor = async (req, res) => {
     const { file } = req;
 
     const newActor = new Actor({ name, about, gender });
-    const uploadRes = await cloudinary.uploader.upload(file.path)
+    const {secure_url, public_id} = await cloudinary.uploader.upload(file.path)
+
+    newActor.avatar = {
+        url: secure_url,
+        public_id
+    }
+
+    await newActor.save();
 
     console.log(uploadRes);
-    res.json({
-        message: "ok"
+    res.status(201).json({
+        actor: newActor
     })
 }
