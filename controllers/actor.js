@@ -1,14 +1,9 @@
 const { isValidObjectId } = require("mongoose");
 const Actor = require("../models/actor");
-const cloudinary = require('cloudinary').v2;
-const { sendError } = require("../utils/helper")
+const { sendError, uploadImageToCloud, formatActor } = require("../utils/helper");
+const cloudinary = require("../cloud");
 
-cloudinary.config({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.CLOUD_API_KEY,
-    api_secret: process.env.CLOUD_API_SECRET,
-    // secure: true
-});
+
 
 
 exports.createActor = async (req, res) => {
@@ -18,24 +13,16 @@ exports.createActor = async (req, res) => {
     const newActor = new Actor({ name, about, gender });
 
     if (file) {
-        const { secure_url, public_id } = await cloudinary.uploader.upload(file.path, {gravity: "face", height: 500, width: 500, crop: "thumb"})
+        const { url, public_id } = uploadImageToCloud(file.path);
         newActor.avatar = {
-            url: secure_url,
+            url,
             public_id
         }
     }
 
     await newActor.save();
-
-    res.status(201).json({
-        actor: {
-            id: newActor._id,
-            name,
-            about,
-            gender,
-            avatar: newActor.avatar?.url
-        }
-    })
+    res.status(201).json({actor: formatActor(newActor)});
+    
 }
 
 
@@ -65,9 +52,9 @@ exports.updateActor = async (req, res) => {
 
     // upload avatar
     if (file) {
-        const { secure_url, public_id } = await cloudinary.uploader.upload(file.path, {gravity: "face", height: 500, width: 500, crop: "thumb"})
+        const { url, public_id } = uploadImageToCloud(file.path);
         actor.avatar = {
-            url: secure_url,
+            url,
             public_id
         }
     }
@@ -79,20 +66,12 @@ exports.updateActor = async (req, res) => {
 
     await actor.save();
 
-    res.status(201).json({
-        actor: {
-            id: actor._id,
-            name,
-            about,
-            gender,
-            avatar: actor.avatar?.url
-        }
-    })
+    res.status(201).json({actor: formatActor(actor)});
 }
 
 
 exports.removeActor = async (req, res) => {
-   
+
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -106,7 +85,7 @@ exports.removeActor = async (req, res) => {
 
     const public_id = actor.avatar?.public_id;
 
-    if (public_id ) {
+    if (public_id) {
         const { result } = await cloudinary.uploader.destroy(public_id);
         if (result !== 'ok') {
             return reusendError(res, 'Could not remove image from cloud!')
@@ -118,4 +97,41 @@ exports.removeActor = async (req, res) => {
     res.json({
         message: "Record removed successfully"
     })
+}
+
+exports.searchActor = async (req, res) => {
+    const { query } = req;
+    const result = await Actor.find({ $text: { $search: `"${query.name}"` } });
+
+    const actors = result.map(actor=> formatActor(actor))
+    res.json(actors);
+}
+
+
+
+exports.getLatestActors = async (req, res) => {
+
+    const result = await Actor.find().sort({ createdAt: '-1' }).limit(12);
+
+    const actors = result.map(actor=> formatActor(actor))
+    res.json(actors);
+}
+
+
+exports.getSingleActor = async (req, res) => {
+
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+        return sendError(res, 'Invalid request!')
+    }
+
+    const actor = await Actor.findById(id);
+    if (!actor) {
+        return sendError(res, 'Invalid request, actor not found!', 404);
+    }
+
+
+
+    res.json({ actor: formatActor(actor) });
 }
