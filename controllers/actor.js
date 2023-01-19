@@ -22,7 +22,6 @@ exports.createActor = async (req, res) => {
 
     await newActor.save();
 
-    console.log(uploadRes);
     res.status(201).json({
         actor: newActor
     })
