@@ -89,3 +89,33 @@ exports.updateActor = async (req, res) => {
         }
     })
 }
+
+
+exports.removeActor = async (req, res) => {
+   
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+        return sendError(res, 'Invalid request!')
+    }
+
+    const actor = await Actor.findById(id);
+    if (!actor) {
+        return sendError(res, 'Invalid request, record not found!', 404);
+    }
+
+    const public_id = actor.avatar?.public_id;
+
+    if (public_id ) {
+        const { result } = await cloudinary.uploader.destroy(public_id);
+        if (result !== 'ok') {
+            return reusendError(res, 'Could not remove image from cloud!')
+        }
+    }
+
+    await Actor.findByIdAndDelete(id);
+
+    res.json({
+        message: "Record removed successfully"
+    })
+}
