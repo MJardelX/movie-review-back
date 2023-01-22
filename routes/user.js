@@ -1,6 +1,7 @@
 const express = require('express');
 const { create, verifyEmail, resendEmailVerificationToken, forgetPasswrod, sendResetPaswordTokenStatus, resetPassword, signInUser } = require('../controllers/user');
-const { isValidPassResetToken, isAuth } = require('../middlewares/user');
+const { isAuth } = require('../middlewares/auth');
+const { isValidPassResetToken } = require('../middlewares/user');
 const { userValidator, validatePassword, signInValidator } = require('../middlewares/validator');
 const { validate } = require('../middlewares/validator');
 
@@ -15,7 +16,6 @@ router.post('/forget-password', forgetPasswrod);
 router.post('/verify-pass-reset-token', isValidPassResetToken, sendResetPaswordTokenStatus);
 router.post('/reset-password',validatePassword, validate ,isValidPassResetToken, resetPassword);
 router.post('/sign-in',signInValidator, validate , signInUser);
-
 router.get('/is-auth', isAuth, (req, res)=>{
     const {user} = req;
 
