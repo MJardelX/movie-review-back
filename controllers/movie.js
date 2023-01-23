@@ -80,15 +80,15 @@ exports.createMovie = async (req, res) => {
     console.log(responsive_breakpoints)
 
     const posterObj = {
-       url,
-       public_id,
-       responsive: []
+        url,
+        public_id,
+        responsive: []
     }
 
-    const {breakpoints} = responsive_breakpoints[0];
-    if(breakpoints.length){
-        for(let imgObj of breakpoints){
-            const {secure_url} = imgObj;
+    const { breakpoints } = responsive_breakpoints[0];
+    if (breakpoints.length) {
+        for (let imgObj of breakpoints) {
+            const { secure_url } = imgObj;
             posterObj.responsive.push(secure_url);
         }
     }
@@ -105,14 +105,14 @@ exports.createMovie = async (req, res) => {
     });
 }
 
-exports.updateMovieWithoutPoster = async (req, res) =>{
+exports.updateMovieWithoutPoster = async (req, res) => {
 
-    const {movieId} = req.params; 
+    const { movieId } = req.params;
 
-    if(!isValidObjectId(movieId)) return sendError(res, 'Invalid Movie Id!');
+    if (!isValidObjectId(movieId)) return sendError(res, 'Invalid Movie Id!');
 
     const movie = await Movie.findById(movieId);
-    if(!movie) return sendError(res, 'Movie not found!', 404);
+    if (!movie) return sendError(res, 'Movie not found!', 404);
 
 
     const {
@@ -166,17 +166,17 @@ exports.updateMovieWithoutPoster = async (req, res) =>{
 }
 
 
-exports.updateMovieWithPoster = async (req, res) =>{
+exports.updateMovieWithPoster = async (req, res) => {
 
-    const {movieId} = req.params; 
+    const { movieId } = req.params;
 
-    if(!isValidObjectId(movieId)) return sendError(res, 'Invalid Movie Id!');
+    if (!isValidObjectId(movieId)) return sendError(res, 'Invalid Movie Id!');
 
 
-    if(!req.file) return sendError(res,'Movie poster is missing!')
+    if (!req.file) return sendError(res, 'Movie poster is missing!')
 
     const movie = await Movie.findById(movieId);
-    if(!movie) return sendError(res, 'Movie not found!', 404);
+    if (!movie) return sendError(res, 'Movie not found!', 404);
 
 
     const {
@@ -221,9 +221,9 @@ exports.updateMovieWithPoster = async (req, res) =>{
 
 
     const posterPublicId = movie.poster?.public_id;
-    if(posterPublicId){
-        const {result} = await cloudinary.uploader.destroy(posterPublicId);
-        if(result!== 'ok'){
+    if (posterPublicId) {
+        const { result } = await cloudinary.uploader.destroy(posterPublicId);
+        if (result !== 'ok') {
             return sendError(res, 'Could not update poster at the moment')
         }
     }
@@ -244,15 +244,15 @@ exports.updateMovieWithPoster = async (req, res) =>{
     console.log(responsive_breakpoints)
 
     const posterObj = {
-       url,
-       public_id,
-       responsive: []
+        url,
+        public_id,
+        responsive: []
     }
 
-    const {breakpoints} = responsive_breakpoints[0];
-    if(breakpoints.length){
-        for(let imgObj of breakpoints){
-            const {secure_url} = imgObj;
+    const { breakpoints } = responsive_breakpoints[0];
+    if (breakpoints.length) {
+        for (let imgObj of breakpoints) {
+            const { secure_url } = imgObj;
             posterObj.responsive.push(secure_url);
         }
     }
@@ -269,3 +269,39 @@ exports.updateMovieWithPoster = async (req, res) =>{
     })
 
 }
+
+
+exports.removeMovie = async (req, res) => {
+
+    const { movieId } = req.params;
+
+    if (!isValidObjectId(movieId)) return sendError(res, 'Invalid Movie Id!');
+
+    const movie = await Movie.findById(movieId);
+    if (!movie) return sendError(res, 'Movie not found!', 404);
+
+    const posterId = movie.poster?.public_id
+    if (posterId) {
+        const { result } = await cloudinary.uploader.destroy(posterId);
+        if (result !== 'ok') {
+            return sendError(res, 'Could not remove poster at the moment')
+        }
+    }
+
+    // remove trailer
+    const trailerId = movie.trailer?.public_id;
+    if (!trailerId) return sendError(res, 'Could not find trailer in the cloud', 404);
+
+    const { resultTrailer } = await cloudinary.uploader.destroy(trailerId, {resource_type:'video'});
+    if (resultTrailer !== 'ok') {
+        return sendError(res, 'Could not remove trailer at the moment');
+    }
+
+
+    await Movie.findByIdAndDelete(movieId);
+
+    res.json({
+        message: 'Move removed successfully'
+    })
+}
+
