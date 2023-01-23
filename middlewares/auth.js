@@ -22,7 +22,7 @@ exports.isAuth = async (req, res, next) => {
 
 exports.isAdmin = async (req, res, next) => {
     const {user} = req;
-    console.log(user)
+    // console.log(user)
 
     if(user.role !== 'admin') return sendError(res, "Unauthorized access!");
 

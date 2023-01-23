@@ -1,7 +1,6 @@
-const { mongo } = require("mongoose");
 const genres = require("../utils/genres");
+const mongoose = require('mongoose');
 
-const mongoose = required('mongoose');
 
 const movieSchema = mongoose.Schema({
     title: {
@@ -18,7 +17,7 @@ const movieSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Actor'
     },
-    releseDate: {
+    releaseDate: {
         type: Date,
         required: true
     },
@@ -60,6 +59,7 @@ const movieSchema = mongoose.Schema({
         type: Object,
         url: { type: String, required: true },
         public_id: { type: String, required: true },
+        responsive: [URL],
         required: true,
     },
     trailer: {
@@ -77,4 +77,4 @@ const movieSchema = mongoose.Schema({
     }
 }, { timestamps: true });
 
-module.exports = mongo.model("Movie", movieSchema);
+module.exports = mongoose.model("Movie", movieSchema);
