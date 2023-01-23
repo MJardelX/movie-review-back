@@ -290,9 +290,11 @@ exports.removeMovie = async (req, res) => {
 
     // remove trailer
     const trailerId = movie.trailer?.public_id;
+    console.log(trailerId)
     if (!trailerId) return sendError(res, 'Could not find trailer in the cloud', 404);
 
-    const { resultTrailer } = await cloudinary.uploader.destroy(trailerId, {resource_type:'video'});
+    const { result: resultTrailer } = await cloudinary.uploader.destroy(trailerId, {resource_type:'video'});
+    console.log(resultTrailer)
     if (resultTrailer !== 'ok') {
         return sendError(res, 'Could not remove trailer at the moment');
     }
