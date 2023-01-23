@@ -85,9 +85,9 @@ exports.createMovie = async (req, res) => {
        responsive: []
     }
 
-    const {breackpoints} = responsive_breakpoints[0].breackpoints;
-    if(breackpoints.length){
-        for(let imgObj of breackpoints){
+    const {breakpoints} = responsive_breakpoints[0];
+    if(breakpoints.length){
+        for(let imgObj of breakpoints){
             const {sec_url} = imgObj;
             posterObj.responsive.push(sec_url);
         }
