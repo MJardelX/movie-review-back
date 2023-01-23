@@ -1,5 +1,5 @@
 const express = require('express');
-const { uploadTrailer, createMovie } = require('../controllers/movie');
+const { uploadTrailer, createMovie, updateMovieWithoutPoster, updateMovieWithPoster } = require('../controllers/movie');
 const { isAuth, isAdmin } = require('../middlewares/auth');
 const { uploadVideo, uploadImage } = require('../middlewares/multer');
 const { validateMovie, validate } = require('../middlewares/validator');
@@ -17,7 +17,32 @@ router.post(
     validateMovie,
     validate,
     createMovie
-  );
+);
+
+router.patch(
+    "/update-movie-without-poster/:movieId",
+    isAuth,
+    isAdmin,
+    // parseDataToJSON,
+    validateMovie,
+    validate,
+    updateMovieWithoutPoster
+);
+
+
+router.patch(
+    "/update-movie-with-poster/:movieId",
+    isAuth,
+    isAdmin,
+    uploadImage.single("poster"),
+    parseDataToJSON,
+    validateMovie,
+    validate,
+    updateMovieWithPoster
+);
+
+
+
 // uploadVideo.single("video"), validateMovie, validate
 
 

@@ -84,9 +84,9 @@ exports.validateMovie = [
         }
     }),
 
-    check('poster').custom((_, { req }) => {
-        if (req.file) Error("Poster file is missing!");
+    // check('poster').custom((_, { req }) => {
+    //     if (!req.file) Error("Poster file is missing!");
 
-        return true;
-    })
+    //     return true;
+    // })
 ]

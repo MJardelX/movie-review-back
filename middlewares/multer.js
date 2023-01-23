@@ -10,6 +10,7 @@ const imageFileFilter = (req, file, cb) =>{
     if(!file){
         cb('There must be an image', false)
     }
+
     cb(null, true)
 } 
 
