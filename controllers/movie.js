@@ -65,35 +65,37 @@ exports.createMovie = async (req, res) => {
 
 
     // uploading poster
-    const { secure_url: url, public_id, responsive_breakpoints } = await cloudinary.uploader.upload(file.path, {
-        transformation: {
-            width: 1280,
-            height: 720
-        },
-        responsive_breakpoints: {
-            create_derived: true,
-            max_width: 640,
-            max_images: 3
+    if (file) {
+
+        const { secure_url: url, public_id, responsive_breakpoints } = await cloudinary.uploader.upload(file.path, {
+            transformation: {
+                width: 1280,
+                height: 720
+            },
+            responsive_breakpoints: {
+                create_derived: true,
+                max_width: 640,
+                max_images: 3
+            }
+        });
+
+
+        const posterObj = {
+            url,
+            public_id,
+            responsive: []
         }
-    });
 
-    console.log(responsive_breakpoints)
-
-    const posterObj = {
-        url,
-        public_id,
-        responsive: []
-    }
-
-    const { breakpoints } = responsive_breakpoints[0];
-    if (breakpoints.length) {
-        for (let imgObj of breakpoints) {
-            const { secure_url } = imgObj;
-            posterObj.responsive.push(secure_url);
+        const { breakpoints } = responsive_breakpoints[0];
+        if (breakpoints.length) {
+            for (let imgObj of breakpoints) {
+                const { secure_url } = imgObj;
+                posterObj.responsive.push(secure_url);
+            }
         }
-    }
 
-    newMovie.poster = posterObj;
+        newMovie.poster = posterObj;
+    }
 
     await newMovie.save();
 
@@ -293,7 +295,7 @@ exports.removeMovie = async (req, res) => {
     console.log(trailerId)
     if (!trailerId) return sendError(res, 'Could not find trailer in the cloud', 404);
 
-    const { result: resultTrailer } = await cloudinary.uploader.destroy(trailerId, {resource_type:'video'});
+    const { result: resultTrailer } = await cloudinary.uploader.destroy(trailerId, { resource_type: 'video' });
     console.log(resultTrailer)
     if (resultTrailer !== 'ok') {
         return sendError(res, 'Could not remove trailer at the moment');
