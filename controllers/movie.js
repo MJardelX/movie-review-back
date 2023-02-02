@@ -309,3 +309,26 @@ exports.removeMovie = async (req, res) => {
     })
 }
 
+
+exports.getMovies = async (req, res) => {
+    const { pageNo = 0, limit = 10 } = req.query;
+
+    const movies = await Movie.find({})
+        .sort({ createdAt: -1 })
+        .skip(parseInt(pageNo) * parseInt(limit))
+        .limit(parseInt(limit));
+
+
+    const results = movies.map(m => ({
+        id: m._id,
+        title: m.title,
+        poster: m.poster?.url,
+        genres: m.genres,
+        status: m.status
+    }))
+
+    res.json({
+        movies:results
+    })
+}
+

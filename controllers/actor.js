@@ -141,3 +141,22 @@ exports.getSingleActor = async (req, res) => {
 
     res.json({ actor: formatActor(actor) });
 }
+
+
+
+exports.getActors = async (req, res) => {
+    const { pageNo, limit } = req.query;
+
+    const actors = await Actor.find({})
+        .sort({createdAt: -1})
+        .skip(parseInt(pageNo) * parseInt(limit))
+        .limit(parseInt(limit));
+
+    const profiles = actors.map(actor=>{
+        return formatActor(actor)
+    })    
+
+    res.json({
+        profiles: profiles
+    })
+}
