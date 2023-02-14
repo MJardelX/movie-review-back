@@ -91,3 +91,6 @@ exports.validateTrailer = check('trailer').isObject().withMessage('Trailer must 
         throw Error("Trailer url is invalid!")
     }
 })
+
+
+exports.validateRatings = check('rating', "Rating must be a number between 1 and 10.").isFloat({min:1, max:10});
